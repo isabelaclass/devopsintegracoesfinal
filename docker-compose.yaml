@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  auth-api:
+    build: ./Auth-API
+    container_name: auth-api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASSWORD=example
+      - DB_NAME=chat_system
+    networks:
+      - chat-net
+
+  record-api:
+    build: ./Record-API
+    container_name: record-api
+    ports:
+      - "5002:5002"
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASSWORD=example
+      - DB_NAME=chat_system
+    networks:
+      - chat-net
+
+  receive-send-api:
+    build: ./Receive-Send-API
+    container_name: receive-send-api
+    ports:
+      - "3002:3002"
+    depends_on:
+      - redis
+      - rabbitmq
+    environment:
+      - REDIS_HOST=redis
+      - RABBITMQ_URL=amqp://rabbitmq
+    networks:
+      - chat-net
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: chat_system
+    networks:
+      - chat-net
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - chat-net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"       # Porta para conexão da aplicação
+      - "15672:15672"     # Porta para acessar painel web
+    networks:
+      - chat-net
+
+volumes:
+  mysql-data:
+
+networks:
+  chat-net:
+    driver: bridge
