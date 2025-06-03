@@ -1,8 +1,9 @@
 import requests
+import os
 
 class AuthProxyService:
     def __init__(self):
-        self.base_url = 'http://localhost:3000'  # URL da sua Auth-API em PHP
+        self.base_url = os.getenv('AUTH_API_HOST', 'http://localhost:3000')  # URL da sua Auth-API em PHP
 
     def verificar_autenticacao(self, token, user_id):
         try:

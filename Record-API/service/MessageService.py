@@ -1,5 +1,6 @@
 import json
 import redis
+import os
 from model.MessageModel import MessageModel
 from config.database import db
 from service.AuthProxyService import AuthProxyService  # <-- usa a proxy
@@ -7,7 +8,15 @@ from service.AuthProxyService import AuthProxyService  # <-- usa a proxy
 class MessageService:
     def __init__(self):
         self.auth_proxy = AuthProxyService()
-        self.redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+        redis_host = os.getenv('REDIS_HOST', 'localhost')
+        redis_port = int(os.getenv('REDIS_PORT', 6379))
+        redis_db = int(os.getenv('REDIS_DB', 0))
+        self.redis_client = redis.Redis(
+            host=redis_host,
+            port=redis_port,
+            db=redis_db,
+            decode_responses=True
+        )
 
     def salvar_mensagem(self, message, userIdSend, userIdReceive):
         nova_mensagem = MessageModel(

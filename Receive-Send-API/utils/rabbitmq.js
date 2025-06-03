@@ -3,13 +3,25 @@ const amqp = require('amqplib');
 let channel;
 
 async function connectRabbitMQ() {
-  try {
-    const connection = await amqp.connect('amqp://localhost');
-    channel = await connection.createChannel();
-    console.log('Conectado ao RabbitMQ');
-  } catch (err) {
-    console.error('Erro ao conectar no RabbitMQ:', err);
+  const rabbitmqHost = process.env.RABBITMQ_HOST || 'amqp://rabbitmq:5672';
+  const maxRetries = 5;
+  let attempt = 0;
+
+  while (attempt < maxRetries) {
+    try {
+      const connection = await amqp.connect(rabbitmqHost);
+      channel = await connection.createChannel();
+      console.log('Conectado ao RabbitMQ');
+      return;
+    } catch (err) {
+      attempt++;
+      console.warn(`Erro ao conectar no RabbitMQ (tentativa ${attempt}/${maxRetries}): ${err.message}`);
+      await new Promise(resolve => setTimeout(resolve, 3000)); // espera 3 segundos
+    }
   }
+
+  console.error('Falha ao conectar no RabbitMQ após várias tentativas. Encerrando.');
+  process.exit(1);
 }
 
 async function sendToQueue(queueName, message) {

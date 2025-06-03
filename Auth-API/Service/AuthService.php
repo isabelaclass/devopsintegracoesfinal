@@ -132,10 +132,11 @@ class AuthService {
     private function getRedis() {
         return new Client([
             'scheme' => 'tcp',
-            'host' => '127.0.0.1',
-            'port' => 6379,
+            'host'   => getenv('REDIS_HOST') ?: 'redis',
+            'port'   => 6379,
         ]);
     }
+
 
     public function atualizarUsuario($email, $dados) {
         $userModel = new UserModel();
