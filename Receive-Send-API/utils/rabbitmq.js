@@ -4,7 +4,7 @@ let channel;
 
 async function connectRabbitMQ() {
   const rabbitmqHost = process.env.RABBITMQ_HOST || 'amqp://rabbitmq:5672';
-  const maxRetries = 5;
+  const maxRetries = 10;
   let attempt = 0;
 
   while (attempt < maxRetries) {
